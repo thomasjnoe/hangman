@@ -1,0 +1,23 @@
+--- !ruby/object:Hangman
+word: fuddle
+letters:
+- f
+- u
+- d
+- d
+- l
+- e
+hidden_letters:
+- f
+- _
+- _
+- _
+- _
+- _
+guessed_letters:
+- a
+- f
+- r
+wrong_guess: false
+wrong_guesses: 2
+game_over: false
