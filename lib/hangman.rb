@@ -26,6 +26,46 @@ class Hangman
 		self.game_over = false
 	end
 
+	def play
+		show_title
+
+			until game_over
+				show_hangman(wrong_guesses)
+				puts "Guessed letters: #{guessed_letters.join(" ")}\nWrong Guesses: #{wrong_guesses}"
+				display_hidden_letters
+				self.wrong_guess = false
+
+				puts "\nGuess a letter (or type \"1\" to save your game, \"2\" to load your last saved game): "
+				begin
+					guess = gets.chomp.downcase.match(/[a-z12]/)[0]
+				rescue StandardError=>e
+					puts "You can only guess a letter from a-z!"
+					redo
+				end
+
+				check_guess(guess)
+				add_guessed_letter(guess)
+				add_wrong_guess(guess)
+
+				check_for_win_condition
+				check_for_loss_condition
+			end
+
+		puts "\nPlay again? (Y/N)"
+		restart = gets.chomp[0].downcase
+		if restart == "y"
+			self.reset
+			self.play
+		else
+			puts "Thanks for playing!"
+			exit
+		end
+	end
+
+	private
+
+	attr_accessor :words, :word, :letters, :hidden_letters, :guessed_letters, :wrong_guess, :game_over
+
 	def display_hidden_letters
 		puts hidden_letters.join(" ")
 	end
@@ -187,45 +227,6 @@ H  H  A       A  N   N   GGGGG  M   M  A       A  N   N
 		end
 	end
 
-	def play
-		show_title
-
-			until game_over
-				show_hangman(wrong_guesses)
-				puts "Guessed letters: #{guessed_letters.join(" ")}\nWrong Guesses: #{wrong_guesses}"
-				display_hidden_letters
-				self.wrong_guess = false
-
-				puts "\nGuess a letter (or type \"1\" to save your game, \"2\" to load your last saved game): "
-				begin
-					guess = gets.chomp.downcase.match(/[a-z12]/)[0]
-				rescue StandardError=>e
-					puts "You can only guess a letter from a-z!"
-					redo
-				end
-
-				check_guess(guess)
-				add_guessed_letter(guess)
-				add_wrong_guess(guess)
-
-				check_for_win_condition
-				check_for_loss_condition
-			end
-
-		puts "\nPlay again? (Y/N)"
-		restart = gets.chomp[0].downcase
-		if restart == "y"
-			self.reset
-			self.play
-		else
-			puts "Thanks for playing!"
-			exit
-		end
-	end
-
-	private
-
-	attr_accessor :words, :word, :letters, :hidden_letters, :guessed_letters, :wrong_guess, :game_over
 end
 
 hangman = Hangman.new
