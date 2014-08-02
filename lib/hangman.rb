@@ -16,6 +16,16 @@ class Hangman
 		@game_over = false
 	end
 
+	def reset
+		self.word = WORDS.sample.downcase
+		self.letters = word.split("")
+		self.hidden_letters = letters.map { |letter| "_" }
+		self.guessed_letters = []
+		self.wrong_guess = true
+		self.wrong_guesses = 0
+		self.game_over = false
+	end
+
 	def display_hidden_letters
 		puts hidden_letters.join(" ")
 	end
@@ -50,6 +60,20 @@ class Hangman
 
 	def add_wrong_guess(guess)
 		self.wrong_guesses += 1 if wrong_guess
+	end
+
+	def show_title
+
+		puts %Q{
+
+H  H      A      N   N   GGGGG  M   M      A      N   N
+H  H     A A     NN  N  G       MM MM     A A     NN  N
+HHHH    AAAAA    N N N  G  GGG  M M M    AAAAA    N N N
+H  H   A     A   N  NN  G    G  M   M   A     A   N  NN
+H  H  A       A  N   N   GGGGG  M   M  A       A  N   N
+
+}
+
 	end
 
 	def show_hangman(guesses)
@@ -143,7 +167,6 @@ class Hangman
 		if File.exists?("game_save.yaml")
 			puts "Loading game..."
 			YAML.load_file("game_save.yaml").play
-			exit
 		else
 			puts "No save file to load! Continuing current game..."
 		end
@@ -165,28 +188,39 @@ class Hangman
 	end
 
 	def play
-		until game_over
-			show_hangman(wrong_guesses)
-			puts "Guessed letters: #{guessed_letters.join(" ")}\nWrong Guesses: #{wrong_guesses}"
-			display_hidden_letters
-			self.wrong_guess = false
+		show_title
 
-			puts "\nGuess a letter (or type \"1\" to save your game, \"2\" to load your last saved game): "
-			begin
-				guess = gets.chomp.downcase.match(/[a-z12]/)[0]
-			rescue StandardError=>e
-				puts "You can only guess a letter from a-z!"
-				redo
+			until game_over
+				show_hangman(wrong_guesses)
+				puts "Guessed letters: #{guessed_letters.join(" ")}\nWrong Guesses: #{wrong_guesses}"
+				display_hidden_letters
+				self.wrong_guess = false
+
+				puts "\nGuess a letter (or type \"1\" to save your game, \"2\" to load your last saved game): "
+				begin
+					guess = gets.chomp.downcase.match(/[a-z12]/)[0]
+				rescue StandardError=>e
+					puts "You can only guess a letter from a-z!"
+					redo
+				end
+
+				check_guess(guess)
+				add_guessed_letter(guess)
+				add_wrong_guess(guess)
+
+				check_for_win_condition
+				check_for_loss_condition
 			end
 
-			check_guess(guess)
-			add_guessed_letter(guess)
-			add_wrong_guess(guess)
-
-			check_for_win_condition
-			check_for_loss_condition
+		puts "\nPlay again? (Y/N)"
+		restart = gets.chomp[0].downcase
+		if restart == "y"
+			self.reset
+			self.play
+		else
+			puts "Thanks for playing!"
+			exit
 		end
-
 	end
 
 	private
@@ -194,15 +228,6 @@ class Hangman
 	attr_accessor :words, :word, :letters, :hidden_letters, :guessed_letters, :wrong_guess, :game_over
 end
 
-puts %Q{
-
-H  H      A      N   N   GGGGG  M   M      A      N   N
-H  H     A A     NN  N  G       MM MM     A A     NN  N
-HHHH    AAAAA    N N N  G  GGG  M M M    AAAAA    N N N
-H  H   A     A   N  NN  G    G  M   M   A     A   N  NN
-H  H  A       A  N   N   GGGGG  M   M  A       A  N   N
-
-}
 hangman = Hangman.new
 hangman.play
 
